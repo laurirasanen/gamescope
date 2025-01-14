@@ -1,6 +1,7 @@
 #include <linux/input-event-codes.h>
 
 #include "shortcut.h"
+#include "convar.h"
 #include "steamcompmgr_shared.hpp"
 #include "main.hpp"
 
@@ -87,4 +88,99 @@ namespace gamescope
 
 		return true;
 	}
+
+	static const char* ShortcutNames[GAMESCOPE_SHORTCUT_COUNT] = {
+		"",
+		"fullscreen",
+		"filter_nearest",
+		"filter_linear",
+		"upscale_fsr",
+		"upscale_nis",
+		"upscale_sharpness_up",
+		"upscale_sharpness_down",
+		"screenshot",
+		"keyboard_grab",
+	};
+
+	static GamescopeShortcut ParseShortcut( std::string_view sv )
+	{
+		if ( sv.length() > 0 )
+		{
+			for ( auto i = 0; i < GAMESCOPE_SHORTCUT_COUNT; i++ )
+			{
+				if ( sv == ShortcutNames[i] )
+				{
+					return static_cast<GamescopeShortcut>( i );
+				}
+			}
+		}
+
+		return GAMESCOPE_SHORTCUT_NONE;
+	}
+
+	static ConCommand cc_bind( "bind",
+	"Bind a shortcut to SUPER-<key> combination. e.g. 'bind 33,fullscreen'",
+	[](std::span<std::string_view> svArgs )
+	{
+		if ( svArgs.size() < 2 )
+		{
+			console_log.errorf( "Invalid number of arguments." );
+			return;
+		}
+
+		// Space delimited args would be nice but requires
+		// changes to gamescopectl / gamescope_private_execute.
+		auto svBinds = gamescope::Split( svArgs[1], "," );
+		if ( svBinds.size() < 2 )
+		{
+			console_log.errorf( "Invalid number of arguments." );
+			return;
+		}
+
+		// TODO: key names
+		std::optional<uint32_t> ouKey = Parse<uint32_t>( svBinds[0] );
+		if ( !ouKey )
+		{
+			console_log.errorf( "Failed to parse key." );
+			return;
+		}
+
+		uint32_t uKey = *ouKey;
+		auto shortcut = ParseShortcut( svBinds[1] );
+
+		if ( shortcut != GAMESCOPE_SHORTCUT_NONE )
+		{
+			g_shortcutHandler.Bind( uKey, shortcut );
+		}
+	});
+
+	static ConCommand cc_unbind( "unbind", "Unbind a shortcut from SUPER-<key> combination.",
+	[](std::span<std::string_view> svArgs )
+	{
+		if ( svArgs.size() < 2 )
+		{
+			console_log.errorf( "Invalid number of arguments." );
+			return;
+		}
+
+		// TODO: key names
+		std::optional<uint32_t> ouKey = Parse<uint32_t>( svArgs[1] );
+		if ( !ouKey )
+		{
+			console_log.errorf( "Failed to parse key." );
+			return;
+		}
+
+		g_shortcutHandler.Unbind( *ouKey );
+	});
+
+	static ConCommand cc_shortcuts( "shortcuts", "List shortcut names for use with 'bind'",
+	[](std::span<std::string_view> svArgs )
+	{
+		console_log.infof( "Shortcut names:" );
+		for ( auto i = 0; i < GAMESCOPE_SHORTCUT_COUNT; i++ )
+		{
+			console_log.infof( "  %s", ShortcutNames[i] );
+		}
+	});
 }
