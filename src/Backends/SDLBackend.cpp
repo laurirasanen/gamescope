@@ -745,7 +745,7 @@ namespace gamescope
 					if ( event.type == SDL_KEYUP && ( event.key.keysym.mod & KMOD_LGUI ) )
 					{
 						auto shortcut = g_shortcutHandler.GetShortcut( key );
-						bool handled = g_shortcutHandler.HandleShortcut( shortcut );
+						g_shortcutHandler.HandleShortcut( shortcut );
 
 						switch ( shortcut )
 						{
@@ -763,7 +763,7 @@ namespace gamescope
 							default:
 								break;
 						}
-						if ( handled )
+						if ( shortcut != GAMESCOPE_SHORTCUT_NONE )
 						{
 							break;
 						}

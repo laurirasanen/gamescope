@@ -51,7 +51,7 @@ namespace gamescope
 		return GAMESCOPE_SHORTCUT_NONE;
 	}
 
-	bool ShortcutHandler::HandleShortcut( GamescopeShortcut shortcut )
+	void ShortcutHandler::HandleShortcut( GamescopeShortcut shortcut )
 	{
 		switch ( shortcut )
 		{
@@ -82,11 +82,8 @@ namespace gamescope
 				g_bGrabbed = !g_bGrabbed;
 				break;
 			default:
-				return false;
 				break;
 		}
-
-		return true;
 	}
 
 	static const char* ShortcutNames[GAMESCOPE_SHORTCUT_COUNT] = {

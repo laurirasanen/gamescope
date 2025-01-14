@@ -34,7 +34,7 @@ namespace gamescope
 
 		GamescopeShortcut GetShortcut( uint32_t key );
 
-		bool HandleShortcut( GamescopeShortcut shortcut );
+		void HandleShortcut( GamescopeShortcut shortcut );
 
 	private:
 		std::map<uint32_t, GamescopeShortcut> m_binds;
